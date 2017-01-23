@@ -1,0 +1,5 @@
+gevent
+flake8
+# for test
+pytest
+coverage==3.7.1

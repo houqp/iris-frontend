@@ -1,0 +1,19 @@
+# You will want to change this to where you have our iris-api instance running
+api:
+  host: 127.0.0.1
+  port: 16649
+  user: iris-frontend
+  api_key: 'API_KEY'
+
+flask:
+  SECRET_KEY: 'secret'
+
+auth:
+  module: 'iris_frontend.auth.noauth'
+  # fill these in if you want to auth with ldap
+  # module: 'auth.ldap'
+  # ldap_cert_path: ''
+  # ldap_url: ''
+  # ldap_user_suffix: ''
+
+debug: true

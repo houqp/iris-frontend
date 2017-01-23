@@ -1,0 +1,12 @@
+*.swp
+*.pyc
+*Session.vim*
+*.log
+cscope.*
+.*.swo
+tags
+venv
+src/iris_frontend/static/bundles
+src/iris_frontend/static/.webassets-cache
+*.map
+*.pem
