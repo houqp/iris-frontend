@@ -1265,6 +1265,7 @@ iris = {
       var self = this;
 
       return $.getJSON(self.data.url + path).done(function(response){
+        iris.changeTitle('Incident #' + response.id);
         $.getJSON('/api/v0/applications/' + response.application).done(function(application){
           if (application.context_template) {
             Handlebars.registerPartial('context_template', application.context_template);
@@ -1275,7 +1276,6 @@ iris = {
           self.data.DataTable = $(self.data.messageTable).DataTable(self.data.dataTableOpts);
           iris.tables.bindArrowKeys(self.data.DataTable);
           self.events();
-          iris.changeTitle('Incident #' + response.id);
         });
       }).fail(function(){
         iris.createAlert('Incident not found');
