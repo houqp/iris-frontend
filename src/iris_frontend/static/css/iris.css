@@ -1188,12 +1188,20 @@ table.dataTable thead .sorting_asc {
 }
 
 #priority-inner {
-  display: inline-block;
+  width: 100%;
+}
+
+#priority-table {
+  width: 100%;
+}
+
+#priority-table .delete-column {
+  width: 86px;
 }
 
 #priority-controls {
   margin-top: 10px;
-  margin-right: 10px;
+  margin-right: 20px;
 }
 
 #add-application-select {

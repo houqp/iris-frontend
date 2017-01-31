@@ -58,7 +58,7 @@
     {{#each priorities}}
       <td class="priority-name">{{name}}</td>
     {{/each}}
-      <td></td>
+      <td class="delete-column"></td>
     </tr>
   </thead>
   <tbody>
@@ -80,7 +80,6 @@
       <td>
         <select class="app-priority form-control border-bottom" value="{{default_mode}}" data-app="{{@../key}}" data-type="{{name}}">
           {{#each ../../modeSet}}<option value="{{this}}">{{this}}</option>{{/each}}
-          <option value="default">default - {{default_mode}}</option>
         </select>
       </td>
   {{/each}}
