@@ -1180,12 +1180,24 @@ table.dataTable thead .sorting_asc {
 
 .priority.form-control {
   height: 28px;
+  width: 120px;
 }
 
-.priority-name {
-  width: 80px;
-  padding: 10px 0;
-  font-size: 12px;
+.priority-name::first-letter, .application-name::first-letter {
+  text-transform: uppercase;
+}
+
+#priority-inner {
+  display: inline-block;
+}
+
+#priority-controls {
+  margin-top: 10px;
+  margin-right: 10px;
+}
+
+#add-application-select {
+  width: auto;
 }
 
 /*
