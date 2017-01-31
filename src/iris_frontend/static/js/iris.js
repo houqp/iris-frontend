@@ -1674,9 +1674,8 @@ iris = {
         self.data.$saveBtn.removeClass('disabled');
       });
     },
-    redrawApplicationDropdown: function(exclude) {
+    redrawApplicationDropdown: function() {
       var self = this;
-          exclude = exclude || [];
       self.data.$addAppSelect.empty();
       self.data.$addAppSelect.append($('<option value="">').text('Add Application'));
       var myApps = Object.keys(self.data.settings.per_app_modes);
