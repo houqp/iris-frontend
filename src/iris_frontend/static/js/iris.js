@@ -1587,36 +1587,44 @@ iris = {
           $priority = this.data.$priority,
           settings = this.data.settings,
           self = this;
-      this.data.$priority.empty();
-      this.data.$priority.append(template(settings));
       var global_default_values = {};
       var app_default_values = {};
+      settings.per_app_defaults = {};
       window.appData.priorities.forEach(function(priority) {
         global_default_values[priority.name] = priority.default_mode;
       });
       window.appData.applications.forEach(function(app) {
         app_default_values[app.name] = app.default_modes;
       });
+      settings.per_app_defaults_obj = {};
+      for (var app in settings.per_app_modes) {
+        settings.per_app_defaults[app] = [];     // Needed for handlebars
+        settings.per_app_defaults_obj[app] = {}; // Needed for JS elsewhere
+        window.appData.priorities.forEach(function(p) {
+          var priority = p.name;
+          var default_mode = app_default_values[app][priority] ? app_default_values[app][priority] : (
+            global_default_values[priority] ? global_default_values[priority] : ''
+          );
+          settings.per_app_defaults[app].push({
+            priority_name: priority,
+            default_mode: default_mode
+          });
+          settings.per_app_defaults_obj[app][priority] = default_mode;
+        });
+      }
+      this.data.$priority.empty();
+      this.data.$priority.append(template(settings));
       //load saved user settings to ui, and make changing any of them enable the save button
       $priority.find('select').each(function(){
         var priority = $(this).data('type'),
             app = $(this).data('app'),
             setting;
         if (app) {
-          // Try: user defined app modes, default app modes, my default modes, and finally global default modes
-          setting = settings.per_app_modes[app][priority] ? settings.per_app_modes[app][priority] : (
-            app_default_values[app][priority] ? app_default_values[app][priority] : (
-               settings.modes[priority] ? settings.modes[priority] : (
-                global_default_values[priority] ? global_default_values[priority] : ''
-               )
-            )
-          );
+          setting = settings.per_app_modes[app][priority] ? settings.per_app_modes[app][priority] : 'default';
         } else {
           setting = settings.modes[priority] ? settings.modes[priority] : 'default';
         }
-
         $(this).val(setting);
-
         // On dropdown change state, modify our settings dictionaries so the next table redraw shows
         // the changed settings
         $(this).change(function() {
@@ -1635,7 +1643,6 @@ iris = {
           }
         });
       });
-
       $priority.find('button.delete-app-button').each(function() {
         $(this).click(function() {
           self.deletePerApp($(this));
@@ -1678,10 +1685,26 @@ iris = {
       $('#priority-table tr.app-row').each(function() {
         var app = $(this).data('app');
         var appOptions = {application: app};
+        var all_default = true;
         $(this).find('select.app-priority').each(function() {
-            var $this = $(this);
-            appOptions[$this.attr('data-type')] = $this.val();
+            var $this = $(this),
+                val = $this.val();
+            appOptions[$this.attr('data-type')] = val
+            if (val != 'default') {
+              all_default = false;
+            }
         });
+
+        // If the user chooses 'default' for all values, set each one to the default value for that app or column to avoid the row
+        // disappearing on reload (as all 'default' deletes the custom setting)
+        if (all_default) {
+          for (var key in appOptions) {
+            if (key != 'application') {
+              appOptions[key] = self.data.settings.per_app_defaults_obj[app][key];
+            }
+          }
+        }
+
         saves.push($.ajax({
           url: self.data.postModesUrl + self.data.user,
           data: JSON.stringify(appOptions),
