@@ -1449,6 +1449,9 @@ iris = {
       $reprioritizationToggleBtn: $('#reprioritization h4'),
       $reprioritizationAddBtn: $('#reprio-add-btn'),
       $reprioritizationTable: $('#reprioritization-table'),
+      $addAppSelect: $('#add-application-select'),
+      $addAppBtn: $('#add-application-button'),
+      appsToDelete: {},
       priorityTemplate: $('#priority-template').html(),
       batchingTemplate: $('#batching-template').html(),
       subheaderTemplate: $('#user-contact-template').html(),
@@ -1470,7 +1473,6 @@ iris = {
     events: function(){
       var self = this;
       this.data.$saveBtn.on('click', function(){
-        $(this).addClass('disabled');
         self.saveSetting();
       });
       this.data.$reprioritizationAddBtn.on('click', function(){
@@ -1480,6 +1482,14 @@ iris = {
       this.data.$reprioritizationToggleBtn.on('click', function(){
         self.toggleReprioritization();
       });
+      this.data.$addAppBtn.on('click', function(){
+        self.addApplication();
+      });
+      this.data.$addAppSelect.change(function() {
+        self.data.$addAppBtn.prop('disabled', $(this).val() == '');
+      });
+      self.data.$saveBtn.prop('disabled', true);
+      self.data.$addAppBtn.prop('disabled', true);
     },
     getUserSettings: function(){
       var self = this;
@@ -1575,14 +1585,70 @@ iris = {
     createPriorityTable: function(){
       var template = Handlebars.compile(this.data.priorityTemplate),
           $priority = this.data.$priority,
-          settings = this.data.settings;
-      this.data.$priority.append(template(settings));
-      //load saved user settings to ui
-      $priority.find('select.priority').each(function(){
-        var priority = $(this).attr('data-type'),
-            setting = settings.modes[priority] ? settings.modes[priority] : 'default';
-        $(this).val(setting);
+          settings = this.data.settings,
+          self = this;
+      var global_default_values = {};
+      var app_default_values = {};
+      settings.per_app_defaults = {};
+      window.appData.priorities.forEach(function(priority) {
+        global_default_values[priority.name] = priority.default_mode;
       });
+      window.appData.applications.forEach(function(app) {
+        app_default_values[app.name] = app.default_modes;
+      });
+      settings.per_app_defaults_obj = {};
+      for (var app in settings.per_app_modes) {
+        settings.per_app_defaults[app] = [];     // Needed for handlebars
+        settings.per_app_defaults_obj[app] = {}; // Needed for JS elsewhere
+        window.appData.priorities.forEach(function(p) {
+          var priority = p.name;
+          var default_mode = app_default_values[app][priority] ? app_default_values[app][priority] : (
+            global_default_values[priority] ? global_default_values[priority] : ''
+          );
+          settings.per_app_defaults[app].push({
+            priority_name: priority,
+            default_mode: default_mode
+          });
+          settings.per_app_defaults_obj[app][priority] = default_mode;
+        });
+      }
+      this.data.$priority.empty();
+      this.data.$priority.append(template(settings));
+      //load saved user settings to ui, and make changing any of them enable the save button
+      $priority.find('select').each(function(){
+        var priority = $(this).data('type'),
+            app = $(this).data('app'),
+            setting;
+        if (app) {
+          setting = settings.per_app_modes[app][priority] ? settings.per_app_modes[app][priority] : 'default';
+        } else {
+          setting = settings.modes[priority] ? settings.modes[priority] : 'default';
+        }
+        $(this).val(setting);
+        // On dropdown change state, modify our settings dictionaries so the next table redraw shows
+        // the changed settings
+        $(this).change(function() {
+          self.data.$saveBtn.prop('disabled', false);
+          var val = $(this).val();
+          if (app) {
+            settings.per_app_modes[app][priority] = val;
+          }
+          else {
+            // Our per-app dropdowns do not have default, so don't bother
+            if (val == 'default') {
+              delete settings.modes[priority];
+            } else {
+              settings.modes[priority] = val;
+            }
+          }
+        });
+      });
+      $priority.find('button.delete-app-button').each(function() {
+        $(this).click(function() {
+          self.deletePerApp($(this));
+        });
+      });
+      this.redrawApplicationDropdown();
     },
     createBatchingTable: function(){
       var template = Handlebars.compile(this.data.batchingTemplate),
@@ -1590,26 +1656,108 @@ iris = {
           settings = this.data.settings;
       this.data.$batching.append(template(settings));
     },
+    deletePerApp: function(elem) {
+      var self = this,
+          app = elem.data('app');
+      self.data.$saveBtn.prop('disabled', false);
+      delete self.data.settings.per_app_modes[app];
+      self.data.appsToDelete[app] = true;
+      self.createPriorityTable();
+    },
     saveSetting: function(){
-      var model = this.data.postModel,
+      var gobalOptions = this.data.postModel,
           self = this;
+      self.data.$saveBtn.prop('disabled', true);
       //get form data
-      $('#priority-table select').each(function(){
+      $('#priority-table select.global-priority').each(function(){
         var $this = $(this);
-        model[$this.attr('data-type')] = $this.val();
+        gobalOptions[$this.attr('data-type')] = $this.val();
       });
-      $.ajax({
+
+      var saves = [];
+      saves.push($.ajax({
         url: this.data.postModesUrl + this.data.user,
-        data: JSON.stringify(this.data.postModel),
+        data: JSON.stringify(gobalOptions),
         method: 'POST',
         contentType: 'application/json'
-      }).done(function(){
+      }));
+
+      $('#priority-table tr.app-row').each(function() {
+        var app = $(this).data('app');
+        var appOptions = {application: app};
+        var all_default = true;
+        $(this).find('select.app-priority').each(function() {
+            var $this = $(this),
+                val = $this.val();
+            appOptions[$this.attr('data-type')] = val
+            if (val != 'default') {
+              all_default = false;
+            }
+        });
+
+        // If the user chooses 'default' for all values, set each one to the default value for that app or column to avoid the row
+        // disappearing on reload (as all 'default' deletes the custom setting)
+        if (all_default) {
+          for (var key in appOptions) {
+            if (key != 'application') {
+              appOptions[key] = self.data.settings.per_app_defaults_obj[app][key];
+            }
+          }
+        }
+
+        saves.push($.ajax({
+          url: self.data.postModesUrl + self.data.user,
+          data: JSON.stringify(appOptions),
+          method: 'POST',
+          contentType: 'application/json'
+        }));
+      });
+
+      for (var app in self.data.appsToDelete) {
+        var appOptions = {application: app};
+        self.data.settings.priorities.forEach(function(p) {
+          appOptions[p.name] = 'default';
+        });
+        saves.push($.ajax({
+          url: self.data.postModesUrl + self.data.user,
+          data: JSON.stringify(appOptions),
+          method: 'POST',
+          contentType: 'application/json'
+        }));
+      }
+
+      self.data.appsToDelete = {};
+
+      $.when.apply($, saves).done(function(){
         iris.createAlert('Settings saved.', 'success');
       }).fail(function(){
         iris.createAlert('Failed to save settings', 'danger');
-      }).always(function(){
-        self.data.$saveBtn.removeClass('disabled');
       });
+    },
+    redrawApplicationDropdown: function() {
+      var self = this;
+      self.data.$addAppSelect.empty();
+      self.data.$addAppSelect.append($('<option value="">').text('Add Application'));
+      var myApps = Object.keys(self.data.settings.per_app_modes);
+      this.data.settings.applications.forEach(function(app) {
+        if (myApps.indexOf(app.name) == -1) {
+          self.data.$addAppSelect.append($('<option>').text(app.name));
+        }
+      });
+    },
+    addApplication: function() {
+      var app = this.data.$addAppSelect.val();
+      this.data.$addAppSelect.val('');
+      this.data.$addAppBtn.prop('disabled', true);
+      if (app == '') {
+        return;
+      }
+      this.data.$saveBtn.prop('disabled', false);
+      this.data.settings.per_app_modes[app] = {};
+      if (app in this.data.appsToDelete) {
+        delete this.data.appsToDelete[app];
+      }
+      this.createPriorityTable();
     }
   }, //end iris.user
   stats: {

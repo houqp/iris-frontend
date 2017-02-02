@@ -8,10 +8,16 @@
   <div class="module clearfix user-module col-md-9 col-sm-9 col-xs-9">
     <h4>Priority Modes</h4>
     <span class="light">How would you like to be contacted at each of these priority levels?</span>
-    <table id="priority-table">
-      <!-- Table template renders here -->
-    </table>
-    <button type="button" id="save-settings" class="btn btn-primary btn-sm pull-right">Save</button>
+    <div id="priority-inner">
+      <table id="priority-table">
+        <!-- Table template renders here -->
+      </table>
+      <div id="priority-controls">
+        <select id="add-application-select" class="form-control border-bottom"></select>
+        <button type="button" id="add-application-button" class="btn btn-primary btn-sm">Add</button>
+        <button type="button" id="save-settings" class="btn btn-primary btn-sm pull-right">Save All</button>
+      </div>
+    </div>
   </div>
 </div>
 <div id="reprioritization" class="module">
@@ -48,24 +54,39 @@
 <script id="priority-template" type="text/x-handlebars-template">
   <thead>
     <tr>
-      <td>Priority</td>
-      <td>Mode</td>
+      <td>Application</td>
+    {{#each priorities}}
+      <td class="priority-name">{{name}}</td>
+    {{/each}}
+      <td class="delete-column"></td>
     </tr>
   </thead>
   <tbody>
-  {{#each priorities}}
     <tr>
-      <td class="uppercase priority-name">{{name}}</td>
+      <td class="application-name">Global Default</td>
+  {{#each priorities}}
       <td>
-        <select class="priority form-control" value="{{default_mode}}" data-type="{{name}}">
-          {{#each ../modeSet}}
-          <option value="{{this}}">{{this}}</option>
-          {{/each}}
+        <select class="global-priority form-control border-bottom" value="{{default_mode}}" data-type="{{name}}">
+          {{#each ../modeSet}}<option value="{{this}}">{{this}}</option>{{/each}}
           <option value="default">default - {{default_mode}}</option>
         </select>
       </td>
-    </tr>
   {{/each}}
+    </tr>
+    {{#each per_app_defaults }}
+    <tr data-app="{{@key}}" class="app-row">
+      <td class="application-name">{{@key}}</td>
+  {{#each this}}
+      <td>
+        <select class="app-priority form-control border-bottom" data-app="{{@../key}}" data-type="{{priority_name}}">
+          {{#each ../../modeSet}}<option value="{{this}}">{{this}}</option>{{/each}}
+          <option value="default">default - {{default_mode}}</option>
+        </select>
+      </td>
+  {{/each}}
+      <td><button class="btn btn-primary btn-sm delete-app-button" data-app="{{@key}}" title="Remove custom settings for {{@key}}">Delete</button></td>
+    </tr>
+    {{/each}}
   </tbody>
 </script>
 <script id="batching-template" type="text/x-handlebars-template">
