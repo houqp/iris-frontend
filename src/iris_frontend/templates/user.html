@@ -55,36 +55,36 @@
   <thead>
     <tr>
       <td>Application</td>
-    {{#each priorities}}
+      {{#each priorities}}
       <td class="priority-name">{{name}}</td>
-    {{/each}}
+      {{/each}}
       <td class="delete-column"></td>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td class="application-name">Global Default</td>
-  {{#each priorities}}
+      {{#each priorities}}
       <td>
         <select class="global-priority form-control border-bottom" value="{{default_mode}}" data-type="{{name}}">
           {{#each ../modeSet}}<option value="{{this}}">{{this}}</option>{{/each}}
           <option value="default">default - {{default_mode}}</option>
         </select>
       </td>
-  {{/each}}
+      {{/each}}
     </tr>
     {{#each per_app_defaults }}
     <tr data-app="{{@key}}" class="app-row">
       <td class="application-name">{{@key}}</td>
-  {{#each this}}
+      {{#each this}}
       <td>
         <select class="app-priority form-control border-bottom" data-app="{{@../key}}" data-type="{{priority_name}}">
           {{#each ../../modeSet}}<option value="{{this}}">{{this}}</option>{{/each}}
           <option value="default">default - {{default_mode}}</option>
         </select>
       </td>
-  {{/each}}
-      <td><button class="btn btn-primary btn-sm delete-app-button" data-app="{{@key}}" title="Remove custom settings for {{@key}}">Delete</button></td>
+      {{/each}}
+      <td><button class="btn btn-danger btn-sm delete-app-button" data-app="{{@key}}" title="Remove custom settings for {{@key}}">Delete</button></td>
     </tr>
     {{/each}}
   </tbody>
@@ -186,7 +186,7 @@
       <td>{{dst_mode}}</td>
       <td>{{count}}</td>
       <td>{{duration}}</td>
-      <td><button class="btn btn-sm btn-primary" data-src-mode="{{src_mode}}">Delete</button></td>
+      <td><button class="btn btn-sm btn-danger" data-src-mode="{{src_mode}}">Delete</button></td>
     </tr>
   {{/each}}
   </tbody>
