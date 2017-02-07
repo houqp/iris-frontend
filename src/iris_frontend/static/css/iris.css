@@ -878,6 +878,14 @@ table.dataTable thead .sorting_asc {
   height: 215px; /* less 20px for subject line */
 }
 
+.template-notification .notification-email-subject {
+  overflow: hidden;
+  height: 20px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding-right: 3px;
+}
+
 .template-notification .notification-header {
   background: #f0f3f6;
   color: #333;
