@@ -1665,31 +1665,25 @@ iris = {
       self.createPriorityTable();
     },
     saveSetting: function(){
-      var gobalOptions = this.data.postModel,
+      var globalOptions = this.data.postModel,
           self = this;
       self.data.$saveBtn.prop('disabled', true);
       //get form data
       $('#priority-table select.global-priority').each(function(){
         var $this = $(this);
-        gobalOptions[$this.attr('data-type')] = $this.val();
+        globalOptions[$this.attr('data-type')] = $this.val();
       });
 
-      var saves = [];
-      saves.push($.ajax({
-        url: this.data.postModesUrl + this.data.user,
-        data: JSON.stringify(gobalOptions),
-        method: 'POST',
-        contentType: 'application/json'
-      }));
+      globalOptions.per_app_modes = {};
 
       $('#priority-table tr.app-row').each(function() {
-        var app = $(this).data('app');
-        var appOptions = {application: app};
-        var all_default = true;
+        var app = $(this).data('app'), all_default = true;
+
+        globalOptions.per_app_modes[app] = {};
+
         $(this).find('select.app-priority').each(function() {
-            var $this = $(this),
-                val = $this.val();
-            appOptions[$this.attr('data-type')] = val
+            var $this = $(this), val = $this.val();
+            globalOptions.per_app_modes[app][$this.attr('data-type')] = val;
             if (val != 'default') {
               all_default = false;
             }
@@ -1698,37 +1692,27 @@ iris = {
         // If the user chooses 'default' for all values, set each one to the default value for that app or column to avoid the row
         // disappearing on reload (as all 'default' deletes the custom setting)
         if (all_default) {
-          for (var key in appOptions) {
-            if (key != 'application') {
-              appOptions[key] = self.data.settings.per_app_defaults_obj[app][key];
-            }
+          for (var key in globalOptions.per_app_modes[app]) {
+            globalOptions.per_app_modes[app][key] = self.data.settings.per_app_defaults_obj[app][key];
           }
         }
-
-        saves.push($.ajax({
-          url: self.data.postModesUrl + self.data.user,
-          data: JSON.stringify(appOptions),
-          method: 'POST',
-          contentType: 'application/json'
-        }));
       });
 
       for (var app in self.data.appsToDelete) {
-        var appOptions = {application: app};
+        globalOptions.per_app_modes[app] = {};
         self.data.settings.priorities.forEach(function(p) {
-          appOptions[p.name] = 'default';
+          globalOptions.per_app_modes[app][p.name] = 'default';
         });
-        saves.push($.ajax({
-          url: self.data.postModesUrl + self.data.user,
-          data: JSON.stringify(appOptions),
-          method: 'POST',
-          contentType: 'application/json'
-        }));
       }
 
       self.data.appsToDelete = {};
 
-      $.when.apply($, saves).done(function(){
+      $.ajax({
+        url: this.data.postModesUrl + this.data.user,
+        data: JSON.stringify(globalOptions),
+        method: 'POST',
+        contentType: 'application/json'
+      }).done(function(){
         iris.createAlert('Settings saved.', 'success');
       }).fail(function(){
         iris.createAlert('Failed to save settings', 'danger');
