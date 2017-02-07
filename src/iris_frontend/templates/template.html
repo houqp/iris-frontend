@@ -124,7 +124,7 @@
   <!--// view-only template-->
     <div class="notification-header">{{key}}</div>
     {{#isEqual key 'email'}}
-    <p>{{getValForKey this key 'subject' true}}</p>
+    <p class="notification-email-subject" title="{{getValForKey this key 'subject' true}}">{{getValForKey this key 'subject' true}}</p>
     {{/isEqual}}
     <pre class="notification-body">{{getValForKey this key 'body' true}}</pre>
   </div>
