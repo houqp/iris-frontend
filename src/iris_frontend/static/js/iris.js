@@ -1589,23 +1589,25 @@ iris = {
           self = this;
       var global_default_values = {};
       var app_default_values = {};
+      var app_supported_modes = {};
       settings.per_app_defaults = {};
       window.appData.priorities.forEach(function(priority) {
         global_default_values[priority.name] = priority.default_mode;
       });
       window.appData.applications.forEach(function(app) {
         app_default_values[app.name] = app.default_modes;
+        app_supported_modes[app.name] = app.supported_modes;
       });
       settings.per_app_defaults_obj = {};
       for (var app in settings.per_app_modes) {
-        settings.per_app_defaults[app] = [];     // Needed for handlebars
+        settings.per_app_defaults[app] = {priorities: [], supported_modes: app_supported_modes[app]};     // Needed for handlebars
         settings.per_app_defaults_obj[app] = {}; // Needed for JS elsewhere
         window.appData.priorities.forEach(function(p) {
           var priority = p.name;
           var default_mode = app_default_values[app][priority] ? app_default_values[app][priority] : (
             global_default_values[priority] ? global_default_values[priority] : ''
           );
-          settings.per_app_defaults[app].push({
+          settings.per_app_defaults[app].priorities.push({
             priority_name: priority,
             default_mode: default_mode
           });
