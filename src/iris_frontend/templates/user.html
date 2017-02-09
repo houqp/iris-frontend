@@ -76,10 +76,10 @@
     {{#each per_app_defaults }}
     <tr data-app="{{@key}}" class="app-row">
       <td class="application-name">{{@key}}</td>
-      {{#each this}}
+      {{#each priorities}}
       <td>
         <select class="app-priority form-control border-bottom" data-app="{{@../key}}" data-type="{{priority_name}}">
-          {{#each ../../modeSet}}<option value="{{this}}">{{this}}</option>{{/each}}
+          {{#each ../supported_modes}}<option value="{{this}}">{{this}}</option>{{/each}}
           <option value="default">default - {{default_mode}}</option>
         </select>
       </td>
