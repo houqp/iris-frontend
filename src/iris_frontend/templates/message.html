@@ -14,7 +14,7 @@
   <div class="clearfix">
     <div class="col-md-8 col-sm-8 col-xs-8 module message-module">
       <p class="border-bottom">
-        <label><strong>To:</strong></label> {{target}} ( <a href="tel:{{destination}}">{{destination}}</a> )
+        <label><strong>To:</strong></label> {{target}}{{#if destination}} ( <a href="tel:{{destination}}">{{destination}}</a> ){{/if}}
       </p>
       <p class="border-bottom">
         <label><strong>Subject:</strong></label> {{subject}}
