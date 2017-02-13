@@ -466,6 +466,10 @@ iris = {
       // collect data for tracking templates
 
       if ($trackingEl.length) {
+        if ($trackingEl.find('.template-notification').length == 0) {
+            return true;
+        }
+
         model.tracking_type = $trackingEl.find('#tracking-type').val();
         model.tracking_key = $trackingEl.find('#tracking-key').val();
 
