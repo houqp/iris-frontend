@@ -853,6 +853,8 @@ iris = {
           app = $el.val(),
           self = this;
 
+      self.data.$page.find(self.data.previewTemplate).css('display', !app ? 'none' : '');
+
       template = Handlebars.compile(self.data.variablesTemplateSource);
       $el.parents('.step').find('.variables').html(template({variables: this.getVariablesForApp(app)}));
     },
