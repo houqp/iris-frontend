@@ -24,7 +24,6 @@ class IrisClient(HTTPConnectionPool):
         self.HMAC = hmac.new(api_key, '', hashlib.sha512)
 
     def post(self, endpoint, qs=None, **data):
-        HMAC = self.HMAC.copy()
         path_parts = ['/v%s/' % self.version, endpoint]
         if qs:
             path_parts.extend(('?', qs))
@@ -41,7 +40,6 @@ class IrisClient(HTTPConnectionPool):
         return re
 
     def get(self, endpoint, qs=None):
-        HMAC = self.HMAC.copy()
         path_parts = ['/v%s/' % self.version, endpoint]
         if qs:
             path_parts.extend(('?', qs))
@@ -58,7 +56,6 @@ class IrisClient(HTTPConnectionPool):
         return re
 
     def delete(self, endpoint, qs=None, **data):
-        HMAC = self.HMAC.copy()
         path_parts = ['/v%s/' % self.version, endpoint]
         if qs:
             path_parts.extend(('?', qs))
