@@ -1217,6 +1217,24 @@ table.dataTable thead .sorting_asc {
 }
 
 /*
+ * Applications page
+ */
+
+.application-setting {
+  margin: 10px 0 15px 18px;
+  background-color: #fff;
+}
+
+
+.application-setting textarea, .application-setting pre {
+  margin-bottom: 0;
+  border-radius: 0;
+  box-shadow: none;
+  border: 1px solid #dddedf;
+  height: 150px;
+}
+
+/*
  * Stats page
  */
 

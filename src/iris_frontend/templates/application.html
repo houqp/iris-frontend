@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="main view-application">
+  <!-- template renders here -->
+</div>
+{% raw %}
+<script id="application-template" type="text/x-handlebars-template">
+  <div class="module">
+    <h3>{{name}}</h3>
+    {{#if owners}}
+    <span class="light">Owners: {{#each owners}}<span class="label label-info">{{this}}</span> {{/each}}</span><br>
+    {{/if}}
+    <span class="light">Variables: {{#each variables}}<span class="label label-info">{{this}}</span> {{/each}}</span>
+  </div>
+  <div class="module">
+    <h4>Context Template</h4>
+    <div class="application-setting">
+      <pre>{{context_template}}</pre>
+    </div>
+    <h4>Summary Template</h4>
+    <div class="application-setting">
+      <pre>{{summary_template}}</pre>
+    </div>
+    <h4>Sample Context</h4>
+    <div class="application-setting">
+      <pre>{{sample_context}}</pre>
+    </div>
+  </div>
+  <div class="module">
+    <h4>Message Volume Quotas</h4>
+    {{#if quota}}
+      Soft quota will be breached when <strong>{{lookup quota "soft_quota_threshold"}}</strong> messages occur within <strong>{{lookup quota "soft_quota_duration"}}</strong> seconds, and will then notify <strong>{{lookup quota "target_name"}}</strong> via email.<br>
+      Hard quota (message drop) will be breached when <strong>{{lookup quota "hard_quota_threshold"}}</strong> messages occur within <strong>{{lookup quota "hard_quota_duration"}}</strong> seconds, and will create an incident with plan <strong>{{lookup quota "plan_name"}}</strong>.
+    {{else}}
+      <span class="light">No quota configured</span>
+    {{/if}}
+  </div>
+</script>
+{% endraw %}
+{% endblock %}

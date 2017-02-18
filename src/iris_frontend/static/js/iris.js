@@ -1752,6 +1752,65 @@ iris = {
       this.createPriorityTable();
     }
   }, //end iris.user
+  applications: {
+    data: {
+      $page: $('.main'),
+      $table: $('#applications-table'),
+      tableTemplate: $('#applications-table-template').html(),
+      DataTable: null,
+      dataTableOpts: {
+        orderClasses: false,
+        order: [[0, 'asc']]
+      }
+    },
+    init: function() {
+      iris.changeTitle('Applications');
+      iris.tables.createTable.call(this, window.appData.applications);
+      this.events();
+    },
+    events: function() {
+      this.data.$table.find('tbody tr').click(function() {
+        window.location = '/applications/' + $(this).data('application');
+      })
+    }
+  }, // End iris.applications
+  application: {
+    data: {
+      url: '/api/v0/applications/',
+      $page: $('.main'),
+      applicationTemplate: $('#application-template').html(),
+    },
+    init: function() {
+      var location = window.location.pathname.split('/'),
+          application = decodeURIComponent(location[location.length - 1]);
+      this.getApplication(application);
+    },
+    getApplication: function(application) {
+      var template = Handlebars.compile(this.data.applicationTemplate),
+          app = null,
+          self = this;
+      for (var i = 0, item; i < window.appData.applications.length; i++) {
+          item = window.appData.applications[i];
+          if (item.name == application) {
+              app = item;
+              break;
+          }
+      }
+      if (!app) {
+        iris.createAlert('Application not found');
+        return;
+      }
+      iris.changeTitle('Application ' + app.name);
+      $.getJSON(this.data.url + application + '/quota').done(function(response) {
+        app.quota = response;
+        self.data.$page.html(template(app));
+      }).fail(function() {
+        // When quota does not exist, that endpoint 404s even though application is real
+        app.quota = null;
+        self.data.$page.html(template(app));
+      });
+    }
+  }, // End iris.application
   stats: {
     data: {
       url: '/api/v0/stats',

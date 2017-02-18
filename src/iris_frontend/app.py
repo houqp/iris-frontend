@@ -327,6 +327,18 @@ def validate():
         })
 
 
+@app.route('/applications/')
+@app.route('/applications/<name>')
+@login_required
+def applications(name=None):
+    user = current_user.id
+    applications = json.loads(client.get('applications').data)
+    if name:
+        return render_template('application.html', user=user, applications=applications)
+    else:
+        return render_template('applications.html', user=user, applications=applications)
+
+
 def hms(seconds):
     m, s = divmod(seconds, 60)
     h, m = divmod(m, 60)
