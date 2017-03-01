@@ -26,9 +26,9 @@
     <table class="display dataTable border-top" id="reprioritization-table"></table>
     <div id="reprio-controls" class="border-top">
       After receiving
-      <input data-type="count" type="text" value="0" id="reprio-count" class="form-control border-bottom" data-default="true"> messages of type
-      <select data-type="src_mode" id="reprio-source-mode" class="form-control border-bottom"></select> within
-      <input data-type="duration" type="text" value="0" id="reprio-count" class="form-control border-bottom" data-default="true"> seconds, change mode to
+      <input data-type="count" type="text" value="0" class="form-control border-bottom" data-default="true"> messages of type
+      <select data-type="src_mode" class="form-control border-bottom"></select> within
+      <input data-type="duration" type="text" value="0" class="form-control border-bottom" data-default="true"> minutes, change mode to
       <select data-type="dst_mode" id="reprio-dest-mode" class="form-control border-bottom"></select>
       <button type="button" class="btn btn-primary btn-sm" id="reprio-add-btn">Add</button>
     </div>
@@ -175,7 +175,7 @@
       <td class="light">Source Mode</td>
       <td class="light">Destination Mode</td>
       <td class="light">Count</td>
-      <td class="light">Duration</td>
+      <td class="light">Duration (Minutes)</td>
       <td class="light">Delete</td>
     </tr>
   </thead>
@@ -185,7 +185,7 @@
       <td>{{src_mode}}</td>
       <td>{{dst_mode}}</td>
       <td>{{count}}</td>
-      <td>{{duration}}</td>
+      <td>{{secondsToMinutes duration}}</td>
       <td><button class="btn btn-sm btn-danger" data-src-mode="{{src_mode}}">Delete</button></td>
     </tr>
   {{/each}}

@@ -1526,6 +1526,7 @@ iris = {
       $('#reprioritization input, #reprioritization select').each(function() {
         data[$(this).data('type')] = $(this).val();
       });
+      data['duration'] *= 60;
       $.ajax({
         url: this.data.reprioritizationUrl + this.data.user,
         data: JSON.stringify(data),
