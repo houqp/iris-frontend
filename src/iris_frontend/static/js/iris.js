@@ -1779,17 +1779,52 @@ iris = {
     data: {
       url: '/api/v0/applications/',
       $page: $('.main'),
+      $editButton: $('#application-edit-button'),
       applicationTemplate: $('#application-template').html(),
+      application: null,
+      model: {}
     },
     init: function() {
       var location = window.location.pathname.split('/'),
           application = decodeURIComponent(location[location.length - 1]);
+      this.data.application = application;
       this.getApplication(application);
     },
+    events: function() {
+      var self = this;
+      $('#application-edit-button').click(function() {
+        self.editApplication();
+      });
+      $('#application-save-button').click(function() {
+        self.saveApplication();
+      });
+      $('.remove-variable').click(function() {
+        var variable = $(this).data('variable');
+        var pos = self.data.model.variables.indexOf(variable);
+        if (pos > -1) {
+            self.data.model.variables.splice(pos, 1)
+        }
+        $(this).parent().remove();
+      });
+      $('#add-variable-form').submit(function() {
+        var variable = $('#add-variable-box').val();
+        if (variable == '') {
+            iris.createAlert('Cannot add empty variable');
+            return false;
+        }
+        if (self.data.model.variables.indexOf(variable) > -1) {
+            iris.createAlert('That variable "'+variable+'" already exists');
+            return false;
+        }
+        $('#add-variable-box').val('');
+        self.data.model.variables.push(variable);
+        self.render();
+        return false;
+      });
+      window.onbeforeunload = iris.unloadDialog.bind(this);
+    },
     getApplication: function(application) {
-      var template = Handlebars.compile(this.data.applicationTemplate),
-          app = null,
-          self = this;
+      var app = null, self = this;
       for (var i = 0, item; i < window.appData.applications.length; i++) {
           item = window.appData.applications[i];
           if (item.name == application) {
@@ -1804,12 +1839,46 @@ iris = {
       iris.changeTitle('Application ' + app.name);
       $.getJSON(this.data.url + application + '/quota').done(function(response) {
         app.quota = response;
-        self.data.$page.html(template(app));
       }).fail(function() {
         // When quota does not exist, that endpoint 404s even though application is real
         app.quota = null;
-        self.data.$page.html(template(app));
+      }).always(function() {
+        app.viewMode = true;
+        app.editable = app.owners.indexOf(window.appData.user) > -1;
+        self.data.model = app;
+        self.render();
       });
+    },
+    editApplication: function() {
+      this.data.model.viewMode = false;
+      this.render();
+    },
+    saveApplication: function() {
+      var self = this;
+      $('.application-settings').find('textarea').each(function(k, elem) {
+        var $elem = $(elem);
+        self.data.model[$elem.data('field')] = $elem.val();
+      });
+      if (self.data.model.sample_context == '') {
+        self.data.model.sample_context = '{}';
+      }
+      $.ajax({
+        url: self.data.url + self.data.application,
+        data: JSON.stringify(self.data.model),
+        method: 'PUT',
+        contentType: 'application/json'
+      }).done(function(data){
+        self.data.model.viewMode = true;
+        self.render();
+        iris.createAlert('Settings saved', 'success');
+      }).fail(function(data) {
+        iris.createAlert('Settings failed to save: '+data.responseJSON.title);
+      });
+    },
+    render: function() {
+      var template = Handlebars.compile(this.data.applicationTemplate);
+      this.data.$page.html(template(this.data.model));
+      this.events();
     }
   }, // End iris.application
   stats: {
