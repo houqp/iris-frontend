@@ -75,7 +75,8 @@ def init(config):
     client_methods = {
         'POST': client.post,
         'GET': client.get,
-        'DELETE': client.delete
+        'DELETE': client.delete,
+        'PUT': client.put
     }
 
     if not config.get('debug'):
@@ -163,7 +164,7 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route('/api/v0/<path:endpoint>', methods=['GET', 'POST', 'DELETE'])
+@app.route('/api/v0/<path:endpoint>', methods=['GET', 'POST', 'DELETE', 'PUT'])
 @login_required
 def post_api_proxy(endpoint):
     qs = request.environ.get('QUERY_STRING')

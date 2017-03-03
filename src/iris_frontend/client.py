@@ -39,6 +39,22 @@ class IrisClient(HTTPConnectionPool):
             raise(ApiServerError(re))
         return re
 
+    def put(self, endpoint, qs=None, **data):
+        path_parts = ['/v%s/' % self.version, endpoint]
+        if qs:
+            path_parts.extend(('?', qs))
+        path = ''.join(path_parts)
+        method = 'PUT'
+        body = json.dumps(data)
+        window = int(time.time()) // 5
+        headers = self.get_headers(window, method, path, body)
+        path_parts[1] = urllib.quote(path_parts[1])
+        path = ''.join(path_parts)
+        re = self.urlopen(method, path, headers=headers, body=body)
+        if re.status / 100 != 2:
+            raise(ApiServerError(re))
+        return re
+
     def get(self, endpoint, qs=None):
         path_parts = ['/v%s/' % self.version, endpoint]
         if qs:

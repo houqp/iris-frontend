@@ -915,9 +915,34 @@ table.dataTable thead .sorting_asc {
 }
 
 .template-notification textarea:focus,
-.template-notification input:focus {
+.template-notification input:focus,
+.application-setting textarea:focus {
   outline: none;
   box-shadow: none;
+}
+
+.view-application .glyphicon-remove {
+  display: none;
+}
+
+.view-application #add-variable-form {
+  visibility: hidden;
+}
+
+.application-module .glyphicon-remove {
+  cursor: pointer;
+}
+
+.application-module .label {
+  margin-right: 3px;
+}
+
+#add-variable-box {
+  width: 120px;
+}
+
+#add-variable-form {
+  display: inline;
 }
 
 .template-notification textarea {
@@ -1232,6 +1257,7 @@ table.dataTable thead .sorting_asc {
   box-shadow: none;
   border: 1px solid #dddedf;
   height: 150px;
+  width: 100%;
 }
 
 /*

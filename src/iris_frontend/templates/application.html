@@ -1,19 +1,30 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="main view-application">
+<div class="main">
   <!-- template renders here -->
 </div>
 {% raw %}
 <script id="application-template" type="text/x-handlebars-template">
-  <div class="module">
-    <h3>{{name}}</h3>
+  <div class="module application-module {{# if @root.viewMode }}view{{else}}edit{{/if}}-application">
+    <h3>
+      {{name}}
+      {{# if @root.editable }}
+        {{# if @root.viewMode }}
+        <button id="application-edit-button" class="btn btn-default blue btn-sm pull-right">Edit Application</button>
+        {{else}}
+        <button id="application-save-button" class="btn btn-primary btn-sm pull-right">Save Application</button>
+        {{/if}}
+      {{/if}}
+    </h3>
     {{#if owners}}
-    <span class="light">Owners: {{#each owners}}<span class="label label-info">{{this}}</span> {{/each}}</span><br>
+    <span class="light">Owners: {{#each owners}}<span class="label label-info">{{this}}</span>{{/each}}</span><br>
     {{/if}}
-    <span class="light">Variables: {{#each variables}}<span class="label label-info">{{this}}</span> {{/each}}</span>
+    <span class="light">Variables: {{#each variables}}<span class="label label-info">{{this}} <i class="glyphicon glyphicon-remove remove-variable" data-variable="{{this}}"></i></span>{{/each}}
+    <form id="add-variable-form"><input type="text" class="form-control border-bottom input-sm" placeholder="Add variable" id="add-variable-box"></input><button type="submit" class="btn btn-primary btn-xs">Add</button></form>
   </div>
-  <div class="module">
+  <div class="module application-settings">
     <h4>Context Template</h4>
+    {{# if @root.viewMode }}
     <div class="application-setting">
       <pre>{{context_template}}</pre>
     </div>
@@ -25,6 +36,19 @@
     <div class="application-setting">
       <pre>{{sample_context}}</pre>
     </div>
+    {{else}}
+    <div class="application-setting">
+      <textarea data-field="context_template" class="form-control">{{context_template}}</textarea>
+    </div>
+    <h4>Summary Template</h4>
+    <div class="application-setting">
+      <textarea data-field="summary_template" class="form-control">{{summary_template}}</textarea>
+    </div>
+    <h4>Sample Context</h4>
+    <div class="application-setting">
+      <textarea data-field="sample_context" class="form-control">{{sample_context}}</textarea>
+    </div>
+    {{/if}}
   </div>
   <div class="module">
     <h4>Message Volume Quotas</h4>
