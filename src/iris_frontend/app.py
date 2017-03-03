@@ -6,7 +6,7 @@ import sys
 from client import IrisClient, ApiServerError
 import yaml
 import ujson as json
-from flask import Flask, render_template, request, flash, redirect, abort, url_for, make_response
+from flask import Flask, render_template, request, flash, redirect, abort, url_for, make_response, Response
 from flask.ext.assets import Environment, Bundle
 from jinja2.sandbox import SandboxedEnvironment
 import importlib
@@ -65,6 +65,8 @@ def init(config):
     global auth_manager
     global client
     global client_methods
+    global healthcheck_path
+    healthcheck_path = config.get('healthcheck_path')
     auth_module = config.get('auth', {'module': 'iris_frontend.auth.noauth'})['module']
     auth = importlib.import_module(auth_module)
     auth_manager = getattr(auth, 'Authenticator')(config)
@@ -277,7 +279,16 @@ def stats():
 
 @app.route('/healthcheck')
 def health_check():
-    return 'GOOD'
+    if not healthcheck_path:
+        logging.error('healthcheck path not set')
+        return Response(status=404, mimetype='text/plain')
+
+    try:
+        with open(healthcheck_path) as h:
+            return Response(h.read().strip(), mimetype='text/plain')
+    except IOError:
+        logging.exception('Failed reading healthcheck file')
+        return Response(status=404, mimetype='text/plain')
 
 
 @app.route('/validate/jinja', methods=['POST'])
