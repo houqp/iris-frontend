@@ -1501,6 +1501,10 @@ pre {
   color: #EC4339;
 }
 
+.alert {
+  white-space: pre-wrap;
+}
+
 .alert.fixed {
   width: 400px;
   position: fixed;
