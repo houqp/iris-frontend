@@ -1854,11 +1854,32 @@ iris = {
       this.render();
     },
     saveApplication: function() {
-      var self = this;
+      var self = this, failedCheck = false;
       $('.application-settings').find('textarea').each(function(k, elem) {
-        var $elem = $(elem);
-        self.data.model[$elem.data('field')] = $elem.val();
+        var $elem = $(elem), field = $elem.data('field'), val = $elem.val();
+        self.data.model[field] = val;
+        $elem.removeClass('invalid-input');
+        if (field == 'context_template' || field == 'summary_template') {
+          try {
+            Handlebars.compile(val)({})
+          } catch (e) {
+            iris.createAlert('Invalid HandleBars syntax for ' + field + '.\n' + e.message);
+            $elem.addClass('invalid-input');
+            failedCheck = true;
+          }
+        } else if (field == 'sample_context' && val != '') {
+          try {
+            JSON.parse(val);
+          } catch (e) {
+            iris.createAlert('Invalid JSON syntax for sample context.\n' + e.message);
+            $elem.addClass('invalid-input');
+            failedCheck = true;
+          }
+        }
       });
+      if (failedCheck) {
+        return;
+      }
       if (self.data.model.sample_context == '') {
         self.data.model.sample_context = '{}';
       }
