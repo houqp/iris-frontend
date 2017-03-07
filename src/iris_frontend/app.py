@@ -11,6 +11,7 @@ from flask.ext.assets import Environment, Bundle
 from jinja2.sandbox import SandboxedEnvironment
 import importlib
 import logging
+from urllib3.exceptions import MaxRetryError
 
 from flask.ext.login import UserMixin, LoginManager, login_required, login_user, logout_user, current_user
 
@@ -109,6 +110,14 @@ class User(UserMixin):
         self.id = name
 
 
+@app.errorhandler(MaxRetryError)
+def handle_max_retry(error):
+    page = render_template('error.html', path='error', error_code="500",
+                           error_status="Internal Server Error",
+                           error_text="Failed to reach Iris API")
+    return make_response(page, 500)
+
+
 @app.errorhandler(ApiServerError)
 def handle_server_error(error):
     resp = error.resp
@@ -116,6 +125,7 @@ def handle_server_error(error):
                            error_status="Internal Server Error",
                            error_text="Received [%s] from iris-api: %s" % (resp.status, resp.reason))
     return make_response(page, 500)
+
 
 @app.errorhandler(404)
 def page_not_found(e):
