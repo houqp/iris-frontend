@@ -20,9 +20,6 @@ setuptools.setup(
         'urllib3==1.10.1',
         'python-ldap==2.4.9',
         'cssmin==0.2.0',
-        # for py26
-        'importlib==1.0.3',
-        'argparse',
     ],
     entry_points={
         'console_scripts': [
