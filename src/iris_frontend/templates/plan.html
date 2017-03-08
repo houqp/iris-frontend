@@ -252,10 +252,9 @@
     <p>
       <label class="item-label light" data-toggle="tooltip" title="Role for target">Role</label>
       <select class="form-control border-bottom" data-type="role" value="{{role}}">
-        <option value="manager" {{isSelected role 'manager' }} data-url-type="team">Manager</option>
-        <option value="oncall" {{isSelected role 'oncall' }} data-url-type="team">On call</option>
-        <option value="user" {{isSelected role 'user' }} data-url-type="user">User</option>
-        <option value="team" {{isSelected role 'team' }} data-url-type="team">Team</option>
+        {{#each @root.target_roles}}
+          <option value="{{this.name}}" {{isSelected this.name ../role}} data-url-type="{{this.type}}"> {{this.name}} </option>
+        {{/each}}
       </select>
     </p>
     <p>

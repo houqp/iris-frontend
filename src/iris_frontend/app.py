@@ -204,10 +204,17 @@ def plans(name=None):
     user = current_user.id
     if name:
         modes = json.loads(client.get('modes').data)
+        target_roles = json.loads(client.get('target_roles').data)
         priorities = json.loads(client.get('priorities').data)
         templates = json.loads(client.get('templates').data)
         applications = json.loads(client.get('applications').data)
-        return render_template('plan.html', user=user, modes=modes, priorities=priorities, templates=templates, applications=applications)
+        return render_template('plan.html',
+                               user=user,
+                               modes=modes,
+                               target_roles=target_roles,
+                               priorities=priorities,
+                               templates=templates,
+                               applications=applications)
     else:
         return render_template('plans.html')
 

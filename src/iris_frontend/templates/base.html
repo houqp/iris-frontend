@@ -72,6 +72,11 @@
       {% else %}
       appData.modes = [];
       {% endif %}
+      {% if target_roles %}
+      appData.target_roles = {{ target_roles|tojson }};
+      {% else %}
+      appData.target_roles = [];
+      {% endif %}
       {% if priorities %}
       appData.priorities = {{ priorities|tojson }};
       {% else %}

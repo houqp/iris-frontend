@@ -149,6 +149,7 @@ iris = {
       submitModel: {},
       blankModel: {
         priorities: window.appData.priorities,
+        target_roles: window.appData.target_roles,
         availableTemplates: [],
         aggregation_reset: 300,
         aggregation_window: 300,
@@ -266,6 +267,7 @@ iris = {
       response.viewMode = false;
       response.templates = window.appData.templates;
       response.priorities = window.appData.priorities;
+      response.target_roles = window.appData.target_roles;
       response.applications = window.appData.applications;
       this.data.$page.html(this.data.template(response));
       iris.typeahead.init();
