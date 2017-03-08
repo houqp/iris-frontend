@@ -50,13 +50,20 @@
     </div>
     {{/if}}
   </div>
-  <div class="module">
+  <div class="module application-quota">
     <h4>Message Volume Quotas</h4>
-    {{#if quota}}
-      Soft quota will be breached when <strong>{{lookup quota "soft_quota_threshold"}}</strong> messages occur within <strong>{{lookup quota "soft_quota_duration"}}</strong> seconds, and will then notify <strong>{{lookup quota "target_name"}}</strong> via email.<br>
-      Hard quota (message drop) will be breached when <strong>{{lookup quota "hard_quota_threshold"}}</strong> messages occur within <strong>{{lookup quota "hard_quota_duration"}}</strong> seconds, and will create an incident with plan <strong>{{lookup quota "plan_name"}}</strong>.
+    {{#if @root.showEditQuotas }}
+      Soft quota will be breached when <input type="number" name="soft_quota_threshold" class="form-control border-bottom" value="{{ quota.soft_quota_threshold }}"> messages occur within <input type="number" name="soft_quota_duration" class="form-control border-bottom" value="{{secondsToMinutes quota.soft_quota_duration }}"> minutes,
+      and will then notify <input type="text" name="target_name" class="form-control border-bottom quota-text typeahead" value="{{ quota.target_name }}"> via email.<br>
+      Hard quota (message drop) will be breached when <input type="number" name="hard_quota_threshold" class="form-control border-bottom" value="{{ quota.hard_quota_threshold }}"> messages occur within <input type="number" name="hard_quota_duration" class="form-control border-bottom" value="{{secondsToMinutes quota.hard_quota_duration }}"> minutes,
+      and will create an incident with plan <input type="text" name="plan_name" class="form-control border-bottom quota-text typeahead" data-typeaheadtype="plan" value="{{ quota.plan_name }}">.
     {{else}}
-      <span class="light">No quota configured</span>
+      {{#if quota}}
+        Soft quota will be breached when <strong>{{ quota.soft_quota_threshold }}</strong> messages occur within <strong>{{secondsToMinutes quota.soft_quota_duration }}</strong> minutes, and will then notify <strong>{{ quota.target_name }}</strong> via email.<br>
+        Hard quota (message drop) will be breached when <strong>{{ quota.hard_quota_threshold }}</strong> messages occur within <strong>{{secondsToMinutes quota.hard_quota_duration }}</strong> minutes, and will create an incident with plan <strong>{{ quota.plan_name }}</strong>.
+      {{else}}
+        <span class="light">No quota configured</span>
+      {{/if}}
     {{/if}}
   </div>
 </script>

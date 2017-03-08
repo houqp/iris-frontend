@@ -345,10 +345,11 @@ def validate():
 def applications(name=None):
     user = current_user.id
     applications = json.loads(client.get('applications').data)
+    user_admin = json.loads(client.get('users/' + user).data)['admin']
     if name:
-        return render_template('application.html', user=user, applications=applications)
+        return render_template('application.html', user=user, applications=applications, user_admin=user_admin)
     else:
-        return render_template('applications.html', user=user, applications=applications)
+        return render_template('applications.html', user=user, applications=applications, user_admin=user_admin)
 
 
 def hms(seconds):
