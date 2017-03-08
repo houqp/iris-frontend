@@ -841,7 +841,7 @@ iris = {
           var variables = {};
           for (var j = 0; j < apps[i].variables.length; j++){
             variables[apps[i].variables[j]] = {
-              'required': apps[i].required_variables.indexOf(apps[i].variables[j]) > -1
+              'required': apps[i].required_variables.indexOf(apps[i].variables[j]) !== -1
             };
           }
           return variables;
@@ -1801,7 +1801,7 @@ iris = {
       $('.remove-variable').click(function() {
         var variable = $(this).data('variable');
         var pos = self.data.model.variables.indexOf(variable);
-        if (pos > -1) {
+        if (pos !== -1) {
             self.data.model.variables.splice(pos, 1)
         }
         $(this).parent().remove();
@@ -1812,7 +1812,7 @@ iris = {
             iris.createAlert('Cannot add empty variable');
             return false;
         }
-        if (self.data.model.variables.indexOf(variable) > -1) {
+        if (self.data.model.variables.indexOf(variable) !== -1) {
             iris.createAlert('That variable "'+variable+'" already exists');
             return false;
         }
@@ -1844,7 +1844,7 @@ iris = {
         app.quota = null;
       }).always(function() {
         app.viewMode = true;
-        app.editable = window.appData.user_admin || app.owners.indexOf(window.appData.user) > -1;
+        app.editable = window.appData.user_admin || app.owners.indexOf(window.appData.user) !== -1;
         app.showEditQuotas = false;
         self.data.model = app;
         self.render();
