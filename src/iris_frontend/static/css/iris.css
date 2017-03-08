@@ -948,9 +948,8 @@ table.dataTable thead .sorting_asc {
   width: auto;
 }
 
-/* display is set to inline-block via style attrib. Need to override it here to avoid the quota form breaking */
 .application-quota span.twitter-typeahead {
-  display: inline !important;
+  width: auto;
 }
 
 /* Make the typeahead menu appear a few pixels underneath the textbox, to avoid it overlapping slightly */
