@@ -937,6 +937,31 @@ table.dataTable thead .sorting_asc {
   margin-right: 3px;
 }
 
+.application-quota input {
+  width: 60px;
+  font-weight: bold;
+  text-align: center;
+  padding: 5px;
+}
+
+.application-quota input.quota-text {
+  width: auto;
+}
+
+.application-quota span.twitter-typeahead {
+  width: auto;
+}
+
+/* Make the typeahead menu appear a few pixels underneath the textbox, to avoid it overlapping slightly */
+.application-quota .tt-menu {
+  top: 130% !important;
+}
+
+/* Hide garbled typeahead text */
+.application-quota input.tt-hint {
+  display: none;
+}
+
 #add-variable-box {
   width: 120px;
 }

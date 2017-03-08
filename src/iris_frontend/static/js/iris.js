@@ -841,7 +841,7 @@ iris = {
           var variables = {};
           for (var j = 0; j < apps[i].variables.length; j++){
             variables[apps[i].variables[j]] = {
-              'required': apps[i].required_variables.indexOf(apps[i].variables[j]) > -1
+              'required': apps[i].required_variables.indexOf(apps[i].variables[j]) !== -1
             };
           }
           return variables;
@@ -1801,7 +1801,7 @@ iris = {
       $('.remove-variable').click(function() {
         var variable = $(this).data('variable');
         var pos = self.data.model.variables.indexOf(variable);
-        if (pos > -1) {
+        if (pos !== -1) {
             self.data.model.variables.splice(pos, 1)
         }
         $(this).parent().remove();
@@ -1812,7 +1812,7 @@ iris = {
             iris.createAlert('Cannot add empty variable');
             return false;
         }
-        if (self.data.model.variables.indexOf(variable) > -1) {
+        if (self.data.model.variables.indexOf(variable) !== -1) {
             iris.createAlert('That variable "'+variable+'" already exists');
             return false;
         }
@@ -1844,13 +1844,15 @@ iris = {
         app.quota = null;
       }).always(function() {
         app.viewMode = true;
-        app.editable = app.owners.indexOf(window.appData.user) > -1;
+        app.editable = window.appData.user_admin || app.owners.indexOf(window.appData.user) !== -1;
+        app.showEditQuotas = false;
         self.data.model = app;
         self.render();
       });
     },
     editApplication: function() {
       this.data.model.viewMode = false;
+      this.data.model.showEditQuotas = window.appData.user_admin;
       this.render();
     },
     saveApplication: function() {
@@ -1883,13 +1885,50 @@ iris = {
       if (self.data.model.sample_context == '') {
         self.data.model.sample_context = '{}';
       }
-      $.ajax({
+      var ajaxCalls = [];
+      if (self.data.model.showEditQuotas) {
+        var quotaSettings = {}, deleteQuota = true;
+        $('.application-quota').find('input').each(function(k, elem) {
+          var $elem = $(elem), field = $elem.attr('name'), val = $elem.val();
+          if (field && val != '' && val != '0') {
+            if (field != 'target_name' && field != 'plan_name') {
+              val = parseInt(val);
+            }
+            quotaSettings[field] = val;
+            deleteQuota = false;
+          }
+        });
+        if (deleteQuota) {
+          self.data.model.quota = null;
+          ajaxCalls.push($.ajax({
+            url: self.data.url + self.data.application + '/quota',
+            method: 'DELETE',
+            data: '{}',
+            contentType: 'application/json'
+          }));
+        } else {
+          self.data.model.quota = quotaSettings;
+          quotaSettings.wait_time = 3600;
+          // Abstract away the fact that quota durations are really seconds underneath
+          quotaSettings.hard_quota_duration *= 60;
+          quotaSettings.soft_quota_duration *= 60;
+          ajaxCalls.push($.ajax({
+            url: self.data.url + self.data.application + '/quota',
+            data: JSON.stringify(quotaSettings),
+            method: 'POST',
+            contentType: 'application/json'
+          }));
+        }
+      }
+      ajaxCalls.push($.ajax({
         url: self.data.url + self.data.application,
         data: JSON.stringify(self.data.model),
         method: 'PUT',
         contentType: 'application/json'
-      }).done(function(data){
+      }));
+      $.when.apply(undefined, ajaxCalls).done(function(){
         self.data.model.viewMode = true;
+        self.data.model.showEditQuotas = false;
         self.render();
         iris.createAlert('Settings saved', 'success');
       }).fail(function(data) {
@@ -1900,6 +1939,11 @@ iris = {
       var template = Handlebars.compile(this.data.applicationTemplate);
       this.data.$page.html(template(this.data.model));
       this.events();
+      if (this.data.model.showEditQuotas) {
+        iris.typeahead.init('');
+      } else {
+        iris.typeahead.destroy();
+      }
     }
   }, // End iris.application
   stats: {
@@ -2070,7 +2114,8 @@ iris = {
   }, //end createAlert
   typeahead: {
     data: {
-      url: '/api/v0/targets/',
+      targetUrl: '/api/v0/targets/',
+      planUrl: '/api/v0/plans?name__startswith=%QUERY&active=1',
       field: 'input.typeahead',
     },
     init: function(urlType){
@@ -2078,13 +2123,25 @@ iris = {
           self = this;
       $field.typeahead('destroy').each(function(){
         var $this = $(this),
-            type = urlType || $this.parents('.plan-notification').find('select[data-type="role"] option:selected').attr('data-url-type'), //get url type from sibling "Role" option
+            type = urlType != undefined ? urlType : $this.parents('.plan-notification').find('select[data-type="role"] option:selected').attr('data-url-type'), //get url type from sibling "Role" option
+            itemType = $this.data('typeaheadtype'),
             results = new Bloodhound({
               datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
               queryTokenizer: Bloodhound.tokenizers.whitespace,
               remote: {
-                url: self.data.url + type + '?startswith=%QUERY',
-                wildcard: '%QUERY'
+                url: itemType == 'plan' ? self.data.planUrl : self.data.targetUrl + type + '?startswith=%QUERY',
+                wildcard: '%QUERY',
+                transform: function(response) {
+                  if (itemType == 'plan') {
+                    var names = [];
+                    response.forEach(function(plan) {
+                      names.push(plan.name);
+                    });
+                    return names;
+                  } else {
+                    return response;
+                  }
+                }
               }
             });
         $this.typeahead(null, {

@@ -66,6 +66,7 @@
     <script>
       window.appData = {};
       appData.user = {{ current_user.get_id()|tojson }};
+      appData.user_admin = {% if user_admin == undefined %}null{% else %}{{ user_admin|tojson }}{% endif %};
       {% if modes %}
       appData.modes = {{ modes|tojson }};
       {% else %}
